@@ -1,0 +1,58 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+    <h1>Favorite Songs</h1>
+    <div id="favoriteList"></div>
+
+    <script>
+        const favoriteIds = JSON.parse(localStorage.getItem('favorites') || '[]');
+        const externalFavIds = JSON.parse(localStorage.getItem('externalFavorites') || '[]')
+        const container = document.getElementById('favoriteList');
+        fetch('/api/tracks/')
+            .then(res => res.json())
+            .then(tracks => {
+
+                const localFavorites = tracks.filter(track => favoriteIds.includes(track.id));
+
+                if (localFavorites.length === 0) {
+                    container.innerHTML = "<p style='color:white;'>No favorites yet.</p>";
+                    return;
+                }
+
+                localFavorites.forEach(track => {
+                    const div = document.createElement('div');
+                    div.className = 'track';
+                    div.innerHTML = `
+                        <img src="${track.cover}" alt="cover" class="track-cover"/>
+                        <div class="track-info">
+                            <strong>${track.title}</strong><br/>
+                            <small>${track.artist} — ${track.genre}</small><br/>
+                            <small><button type="submit">Album - ${track.album}</button></small>
+                        </div>
+                        <a href="/player/${track.id}/"><button>️▶</button></a>
+                        <button disabled>★</button>
+                    `;
+                    container.appendChild(div);
+                });
+
+            });
+        externalFavIds.forEach(track =>{
+            const div = document.createElement('div')
+            div.className = 'track'
+            div.innerHTML = `
+                <img src="${track.cover}" alt="cover" class="track-cover">
+                <div class="track-info">
+                    <strong>${track.title}</strong><br/>
+                    <small>${track.artist} - ${track.artist}</small><br/>
+                    <small>Album - ${track.album}</small>
+                </div>
+                <a href="/external/tune/player/?title=${encodeURIComponent(track.title)}&artist=${encodeURIComponent(track.artist)}"><button>️▶</button></a>
+                <button disabled>★</button>
+            `;
+            container.appendChild(div);
+        })
+        if (favoriteIds.length === 0 && externalFavIds.length === 0) {
+        container.innerHTML = `<p>There are no favorite tracks yet</p>`;
+    }
+    </script>
+{% endblock %}

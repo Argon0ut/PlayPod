@@ -1,0 +1,51 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Catalog — PlayPod{% endblock %}
+
+{% block content %}
+<h1>Track Catalog</h1>
+<div id="catalogPage">
+        <div id="trackList"></div>
+</div>
+
+<script>
+
+    function addFavorite(trackID, buttonElement) {
+        let favList = JSON.parse(localStorage.getItem('favorites') || '[]');
+
+        if (favList.includes(trackID)) {
+            favList = favList.filter(fav => fav !== trackID);
+            buttonElement.textContent = '☆';
+        }else{
+            favList.push(trackID);
+            buttonElement.textContent = '★';
+        }
+        localStorage.setItem('favorites', JSON.stringify(favList));
+    }
+
+    const favList = JSON.parse(localStorage.getItem('favorites') || '[]');
+
+    fetch('/api/tracks/')
+        .then(res => res.json())
+        .then(tracks => {
+        const container = document.getElementById('trackList');
+        tracks.forEach(track => {
+            const isFavorite = favList.includes(track.id);
+
+            const div = document.createElement('div');
+            div.className = 'track';
+            div.innerHTML = `
+                <img src="${track.cover}" alt="cover" class="track-cover" />
+                <div class="track-info">
+                    <strong>${track.title}</strong><br/>
+                    <small>${track.artist} — ${track.genre}</small><br/>
+                    <small><button type="submit">Album - ${track.album}</button></small>
+                </div>
+                <a href="/player/${track.id}/"><button>️▶</button></a>
+                <button onclick="addFavorite(${track.id}, this)">${isFavorite ? '★' : '☆'}</button>
+            `;
+            container.appendChild(div);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+    <h1>Tracks in {{ album.title }}</h1>
+    <select id="externalGenreFilter">
+  <option value="">All Genres</option>
+  <option value="Hip-Hop/Rap">Hip-Hop/Rap</option>
+  <option value="Pop">Pop</option>
+  <option value="Rap">Rap</option>
+  <option value="Rock">Rock</option>
+  <option value="Classical">Classical</option>
+  <option value="Hard Rock">Hard Rock</option>
+  <option value="Lofi">Lofi</option>
+  <option value="Funk">Funk</option>
+  <option value="Brazilian">Brazilian</option>
+  <option value="Alternative">Alternative</option>
+</select>
+    <div id="trackByAlbum"></div>
+
+    <script>
+
+    const album_id = Number('{{ album_id }}');
+    let albumTracks = [];
+
+    document.getElementById('externalGenreFilter').addEventListener('change', function () {
+        const genre = this.value;
+        const filtered = genre ? albumTracks.filter(track => track.genre === genre) : albumTracks;
+        displayTracks(filtered);
+    });
+
+    fetch(`/api/albums/${album_id}/tracks/`)
+        .then(res => res.json())
+        .then(tracks => {
+            albumTracks = tracks;
+            displayTracks(albumTracks);
+        });
+
+    function displayTracks(tracks) {
+        const container = document.getElementById('trackByAlbum');
+        container.innerHTML = '';
+        tracks.forEach(track => {
+        const div = document.createElement('div');
+            div.className = 'track';
+            div.innerHTML = `
+            <img src="${track.cover}" alt="cover" class="track-cover"/>
+
+            <div class="track-info">
+                <strong>${track.title}</strong><br/>
+                <small>${track.artist} - ${track.genre}</small><br/>
+
+            </div>
+            <a href="/player/${track.id}/"><button>️▶</button></a>
+
+            `;
+            container.appendChild(div);
+    });
+}
+
+    </script>
+
+{% endblock %}

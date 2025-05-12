@@ -1,0 +1,88 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<h1>Search Results</h1>
+
+<select id="externalGenreFilter">
+  <option value="">All Genres</option>
+  <option value="Hip-Hop/Rap">Hip-Hop/Rap</option>
+  <option value="Pop">Pop</option>
+  <option value="Rap">Rap</option>
+  <option value="Rock">Rock</option>
+  <option value="Classical">Classical</option>
+  <option value="Hard Rock">Hard Rock</option>
+  <option value="Lofi">Lofi</option>
+  <option value="Funk">Funk</option>
+  <option value="Brazilian">Brazilian</option>
+  <option value="Alternative">Alternative</option>
+
+</select>
+
+<div id="searchResults"></div>
+
+<script>
+    function addExternalFavorite(trackInfo, buttonElement) {
+        let favList = JSON.parse(localStorage.getItem('externalFavorites') || '[]');
+        const exists = favList.some(fav => fav.audio_file === trackInfo.audio_file);
+
+        if (exists) {
+            favList = favList.filter(fav => fav.audio_file !== trackInfo.audio_file);
+            buttonElement.textContent = '☆';
+        } else {
+            favList.push(trackInfo);
+            buttonElement.textContent = '★';
+        }
+
+        localStorage.setItem('externalFavorites', JSON.stringify(favList));
+    }
+
+    function getQueryParam(name) {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(name);
+    }
+
+    const query = getQueryParam('item');
+    let externalTracks = [];
+
+    if (query) {
+        fetch(`/api/search/external/?item=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(results => {
+                externalTracks = results;
+                displayExternalTracks(externalTracks);
+            });
+    }
+
+    document.getElementById('externalGenreFilter').addEventListener('change', function () {
+        const genre = this.value;
+        const filtered = genre ? externalTracks.filter(track => track.genre === genre) : externalTracks;
+        displayExternalTracks(filtered);
+    });
+
+    function displayExternalTracks(tracks) {
+        const container = document.getElementById('searchResults');
+        container.innerHTML = '';
+        const favList = JSON.parse(localStorage.getItem('externalFavorites') || '[]');
+
+        tracks.forEach(track => {
+            const isFavorite = favList.some(fav => fav.audio_file === track.audio_file);
+            const div = document.createElement('div');
+            div.className = 'track';
+            div.innerHTML = `
+                <img src="${track.cover}" alt="cover" class="track-cover" />
+                <div class="track-info">
+                    <strong>${track.title}</strong><br/>
+                    <small>${track.artist} — ${track.genre}</small><br/>
+                    <small>Album - ${track.album}</small>
+                </div>
+                <a href="/external/tune/player/?title=${encodeURIComponent(track.title)}&artist=${encodeURIComponent(track.artist)}">
+                    <button>️▶</button></a>
+                <button onclick='addExternalFavorite(${JSON.stringify(track)}, this)'>
+                    ${isFavorite ? '★' : '☆'}
+                </button>
+            `;
+            container.appendChild(div);
+        });
+    }
+</script>
+{% endblock %}

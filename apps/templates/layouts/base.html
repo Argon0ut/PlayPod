@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PlayPod</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="naming"><h1>PlayPod</h1></div>
+        <div class="search-container">
+          <input type="text" id="inputSearch" placeholder="Search">
+          <button onclick="searchTracks()">Search</button>
+        </div>
+        <a href="{% url 'catalog_page' %}"> Catalog</a>
+        <a href="{% url 'album_page' %}">Albums</a>
+        <a href="{% url 'favorite_page' %}">Favorites</a>
+    </div>
+
+
+    <div class="vertical-line"></div>
+
+    <div class="main-content">
+    {% block content %}
+        <h2>Developer - Yersultan Nussupov</h2>
+        <p>This is a simple music player built with Django</p>
+        <p>You can find the source code on <a href="https://github.com/Argon0ut/PlayPod#">GitHub</a></p>
+        
+        <h2>About</h2>
+        <p>GitHub -- <a href="https://github.com/Argon0ut">GitHub Profile</a></p>
+        <p>LinkedIn -- <a href="https://www.linkedin.com/in/yersultan-nussupov-111b7b29a/"> LinkedIn Profile</a></p>
+    {% endblock %}
+    </div>
+        <script>
+            function searchTracks() {
+                const query = document.getElementById('inputSearch').value;
+                if (query) {
+                    window.location.href = `/search/?item=${encodeURIComponent(query)}`;
+                }
+            }
+        </script>
+</body>
+</html>
