@@ -1,6 +1,6 @@
 from django import forms
-from models import Tune
+from models import Track
 
 class TuneForm(forms.ModelForm):
     class Meta:
-        model = Tune
+        model = Track

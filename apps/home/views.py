@@ -7,7 +7,6 @@ from rest_framework import status
 from .models import Album, Track
 from .serializer import TrackSerializer, AlbumSerializer
 import requests
-# Create your views here.
 
 
 @api_view(['GET'])
@@ -45,7 +44,7 @@ def search_external_tracks(request):
     data = response.json()
 
     data_results = []
-    print(json.dumps(data, indent=2))
+    #print(json.dumps(data, indent=2))
     for item in data.get('results', []):
         data_results.append({
             'title': item.get('trackName'),
